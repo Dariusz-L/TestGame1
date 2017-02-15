@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour {
             _jumpTriggered = true;
         }
 
+		
+		// For testing
         Vector3 pos = _transform.position;
         if (pos.x > 7) {
             pos.x = -5;

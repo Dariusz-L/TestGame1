@@ -8,7 +8,12 @@ public class SpringBoardController : MonoBehaviour {
     [SerializeField] float _springLength;
     [SerializeField] float _coolDownTimeSeconds;
 
+    [SerializeField] float _shakeOffset;
+    [SerializeField] float _shakeTimeseconds;
+    [SerializeField] float _shakeCyclesCount;
+
     float _coolDownTimer;
+    float _shakeTimer;
     bool _isPlayerOnSpringBoard;
     bool _execute;
 
@@ -43,7 +48,9 @@ public class SpringBoardController : MonoBehaviour {
         if (curPos.y >= _limitPos.y) {
             _transform.position = new Vector3(curPos.x, _limitPos.y, curPos.z);
             _rb.isKinematic = true;
+
             _coolDownTimer = 0.0f;
+            _shakeTimer = 0.0f;
 
             Vector3 playerPos = _playerRb.transform.position;
             playerPos.y = curPos.y;
@@ -54,6 +61,15 @@ public class SpringBoardController : MonoBehaviour {
         if (_rb.isKinematic) {
             _coolDownTimer += Time.deltaTime;
             _transform.position = Vector3.Lerp(_limitPos, _defaultPos, _coolDownTimer / _coolDownTimeSeconds);
+
+            if (_shakeTimer < _shakeTimeseconds) {
+                _shakeTimer += Time.deltaTime;
+                ShakePlatform();
+            } else {
+                Debug.Log("End: " + _shakeTimer);
+                _transform.eulerAngles = Vector3.zero;
+            }
+
             if (_transform.position.y <= _defaultPos.y) {
                 _transform.position = new Vector3(curPos.x, _defaultPos.y, curPos.z);
                 _rb.isKinematic = false;
@@ -70,6 +86,14 @@ public class SpringBoardController : MonoBehaviour {
             _execute = false;
             _rb.velocity = new Vector3(0, _springStrength, 0);
         }
+    }
+
+    void ShakePlatform() {
+        Vector3 rot = _transform.eulerAngles;
+        float curOffset = _shakeOffset * ((_shakeTimeseconds - _shakeTimer) / _shakeTimeseconds);
+        rot.x = Mathf.Cos(_shakeTimer * _shakeCyclesCount * 16) * curOffset;
+        rot.y = Mathf.Sin(_shakeTimer * _shakeCyclesCount * 16) * curOffset;
+        _transform.eulerAngles = rot;
     }
 
     void OnCollisionEnter(Collision other) {
